@@ -2,28 +2,23 @@ package main
 
 import (
 	"context"
-	"io/ioutil"
-	"net/http"
+	"fmt"
 	"time"
 )
 
 func main() {
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)	
 	defer cancel()
+	bookHotel(ctx)
+}
 
-	req, err :=  http.NewRequestWithContext(ctx, "GET", "http://google.com.br", nil)
-	if err!= nil {
-    panic(err)
+func bookHotel(ctx context.Context){
+	select {
+		case <-ctx.Done():
+			fmt.Println("Hotel booking cancelled. Timeout reached.")
+      return
+		case <-time.After(5 * time.Second):
+			fmt.Println("Hotel booked.")
   }
-	resp, err := http.DefaultClient.Do(req)
-	if err!= nil {
-    panic(err)
-  }
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err!= nil {
-    panic(err)
-  }
-	println(string(body))
 }
